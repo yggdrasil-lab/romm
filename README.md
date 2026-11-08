@@ -4,7 +4,7 @@ Self-hosted RomM (ROM Manager) retro gaming warehouse for Yggdrasil. Deployed on
 
 ## Architecture
 - **romm**: Core RomM web application, API, and embedded Valkey cache worker.
-- **database**: MariaDB 11.4 database for accounts, game metadata, and library index.
+- **romm-db**: MariaDB 11.4 database for accounts, game metadata, and library index. Attached to `aether-net`.
 
 ## Storage
 - `/mnt/storage/roms/library`: Bulk storage for ROM collections by platform (mergerfs pool).
