@@ -1,0 +1,102 @@
+networks:
+  aether-net:
+    external: true
+  internal:
+    driver: overlay
+    attachable: true
+
+secrets:
+  romm_db_password:
+    external: true
+    name: ${ROMM_DB_PASSWORD_NAME}
+  romm_db_root_password:
+    external: true
+    name: ${ROMM_DB_ROOT_PASSWORD_NAME}
+  romm_auth_secret_key:
+    external: true
+    name: ${ROMM_AUTH_SECRET_KEY_NAME}
+
+services:
+  romm:
+    image: rommapp/romm:latest
+    networks:
+      - aether-net
+      - internal
+    environment:
+      - TZ=Pacific/Auckland
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_NAME=romm
+      - DB_USER=romm
+      - DB_PASSWD_FILE=/run/secrets/romm_db_password
+      - ROMM_AUTH_SECRET_KEY_FILE=/run/secrets/romm_auth_secret_key
+    secrets:
+      - romm_db_password
+      - romm_auth_secret_key
+    labels:
+      - "com.docker.compose.project=${STACK_NAME}"
+    volumes:
+      - /mnt/storage/roms/library:/romm/library
+      - /mnt/storage/roms/assets:/romm/assets
+      - /mnt/storage/roms/resources:/romm/resources
+      - /opt/romm/config:/romm/config
+      - /opt/romm/redis:/redis-data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == muspelheim
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 512M
+      restart_policy:
+        condition: any
+        delay: 5s
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.romm.rule=Host(`romm.${DOMAIN_NAME}`)
+        - traefik.http.routers.romm.entrypoints=websecure
+        - traefik.http.routers.romm.tls=true
+        - traefik.http.services.romm.loadbalancer.server.port=8080
+        - traefik.docker.network=aether-net
+        - homepage.group=Media & Gaming
+        - homepage.name=RomM
+        - homepage.icon=romm.png
+        - homepage.href=https://romm.${DOMAIN_NAME}
+        - homepage.description=Retro ROM & Emulation Library
+
+  database:
+    image: mariadb:11.4
+    networks:
+      - internal
+    environment:
+      - MARIADB_DATABASE=romm
+      - MARIADB_USER=romm
+      - MARIADB_PASSWORD_FILE=/run/secrets/romm_db_password
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/romm_db_root_password
+    secrets:
+      - romm_db_password
+      - romm_db_root_password
+    labels:
+      - "com.docker.compose.project=${STACK_NAME}"
+    volumes:
+      - /opt/romm/db:/var/lib/mysql
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == muspelheim
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 256M
+      restart_policy:
+        condition: any
+        delay: 5s
+        window: 120s
