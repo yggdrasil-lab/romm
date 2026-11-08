@@ -16,6 +16,8 @@ Self-hosted RomM (ROM Manager) retro gaming warehouse for Yggdrasil. Deployed on
 
 ## Deployment Secrets & Variables
 - `vars.DOMAIN_NAME`: Cluster apex domain.
+- `vars.IGDB_CLIENT_ID`: Twitch Developer Application Client ID for IGDB scraping.
+- `secrets.IGDB_CLIENT_SECRET`: Twitch Developer Application Client Secret.
 - `secrets.ROMM_DB_PASSWORD`: MariaDB password for user `romm`.
 - `secrets.ROMM_DB_ROOT_PASSWORD`: MariaDB root password.
 - `secrets.ROMM_AUTH_SECRET_KEY`: Hex-encoded 32-byte secret key for user sessions and JWT signing.
