@@ -15,6 +15,9 @@ secrets:
   romm_auth_secret_key:
     external: true
     name: ${ROMM_AUTH_SECRET_KEY_NAME}
+  igdb_client_secret:
+    external: true
+    name: ${IGDB_CLIENT_SECRET_NAME}
 
 services:
   romm:
@@ -30,9 +33,12 @@ services:
       - DB_USER=romm
       - DB_PASSWD_FILE=/run/secrets/romm_db_password
       - ROMM_AUTH_SECRET_KEY_FILE=/run/secrets/romm_auth_secret_key
+      - IGDB_CLIENT_ID=${IGDB_CLIENT_ID}
+      - IGDB_CLIENT_SECRET_FILE=/run/secrets/igdb_client_secret
     secrets:
       - romm_db_password
       - romm_auth_secret_key
+      - igdb_client_secret
     labels:
       - "com.docker.compose.project=${STACK_NAME}"
     volumes:

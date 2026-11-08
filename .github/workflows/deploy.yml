@@ -15,15 +15,19 @@ jobs:
       - name: Validate Required Configuration
         env:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          IGDB_CLIENT_ID: ${{ vars.IGDB_CLIENT_ID }}
           ROMM_DB_PASSWORD: ${{ secrets.ROMM_DB_PASSWORD }}
           ROMM_DB_ROOT_PASSWORD: ${{ secrets.ROMM_DB_ROOT_PASSWORD }}
           ROMM_AUTH_SECRET_KEY: ${{ secrets.ROMM_AUTH_SECRET_KEY }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
         run: |
           MISSING=""
           [ -z "$DOMAIN_NAME" ] && MISSING="$MISSING DOMAIN_NAME(var)"
+          [ -z "$IGDB_CLIENT_ID" ] && MISSING="$MISSING IGDB_CLIENT_ID(var)"
           [ -z "$ROMM_DB_PASSWORD" ] && MISSING="$MISSING ROMM_DB_PASSWORD(secret)"
           [ -z "$ROMM_DB_ROOT_PASSWORD" ] && MISSING="$MISSING ROMM_DB_ROOT_PASSWORD(secret)"
           [ -z "$ROMM_AUTH_SECRET_KEY" ] && MISSING="$MISSING ROMM_AUTH_SECRET_KEY(secret)"
+          [ -z "$IGDB_CLIENT_SECRET" ] && MISSING="$MISSING IGDB_CLIENT_SECRET(secret)"
           if [ -n "$MISSING" ]; then
             echo "::error::Missing required deployment configuration:$MISSING"
             exit 1
@@ -34,16 +38,19 @@ jobs:
           ROMM_DB_PASSWORD: ${{ secrets.ROMM_DB_PASSWORD }}
           ROMM_DB_ROOT_PASSWORD: ${{ secrets.ROMM_DB_ROOT_PASSWORD }}
           ROMM_AUTH_SECRET_KEY: ${{ secrets.ROMM_AUTH_SECRET_KEY }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
         run: |
           curl -fsSL https://raw.githubusercontent.com/yggdrasil-lab/yggdrasil-os/main/deploy/ensure_secret.sh -o /tmp/ensure_secret.sh
           chmod +x /tmp/ensure_secret.sh
           echo "ROMM_DB_PASSWORD_NAME=$(echo "$ROMM_DB_PASSWORD" | /tmp/ensure_secret.sh romm_db_password)" >> $GITHUB_ENV
           echo "ROMM_DB_ROOT_PASSWORD_NAME=$(echo "$ROMM_DB_ROOT_PASSWORD" | /tmp/ensure_secret.sh romm_db_root_password)" >> $GITHUB_ENV
           echo "ROMM_AUTH_SECRET_KEY_NAME=$(echo "$ROMM_AUTH_SECRET_KEY" | /tmp/ensure_secret.sh romm_auth_secret_key)" >> $GITHUB_ENV
+          echo "IGDB_CLIENT_SECRET_NAME=$(echo "$IGDB_CLIENT_SECRET" | /tmp/ensure_secret.sh igdb_client_secret)" >> $GITHUB_ENV
 
       - name: Deploy Stack
         env:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          IGDB_CLIENT_ID: ${{ vars.IGDB_CLIENT_ID }}
         run: |
           curl -fsSL https://raw.githubusercontent.com/yggdrasil-lab/yggdrasil-os/main/deploy/deploy.sh -o /tmp/deploy.sh
           chmod +x /tmp/deploy.sh
