@@ -117,3 +117,61 @@ services:
         condition: any
         delay: 5s
         window: 120s
+
+  syncthing:
+    image: syncthing/syncthing:latest
+    hostname: muspelheim-saves
+    networks:
+      - aether-net
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - STGUIADDRESS=0.0.0.0:8384
+    volumes:
+      - /opt/romm/syncthing:/var/syncthing/config
+      - /mnt/storage/emulation/saves:/var/syncthing/saves
+    ports:
+      - target: 22000
+        published: 22000
+        protocol: tcp
+        mode: host
+      - target: 22000
+        published: 22000
+        protocol: udp
+        mode: host
+      - target: 21027
+        published: 21027
+        protocol: udp
+        mode: host
+    labels:
+      - "com.docker.compose.project=${STACK_NAME}"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == muspelheim
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+      restart_policy:
+        condition: any
+        delay: 5s
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.syncthing.rule=Host(`saves.${DOMAIN_NAME}`)
+        - traefik.http.routers.syncthing.entrypoints=websecure
+        - traefik.http.routers.syncthing.tls=true
+        - traefik.http.routers.syncthing.middlewares=syncthing-host-header
+        - traefik.http.middlewares.syncthing-host-header.headers.customrequestheaders.Host=localhost
+        - traefik.http.services.syncthing.loadbalancer.server.port=8384
+        - traefik.docker.network=aether-net
+        - homepage.group=Media & Gaming
+        - homepage.name=Save Sync
+        - homepage.icon=syncthing.png
+        - homepage.href=https://saves.${DOMAIN_NAME}
+        - homepage.description=Steam Deck & Emulation Save Sync
+
