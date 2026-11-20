@@ -1,6 +1,9 @@
 networks:
   aether-net:
     external: true
+  internal:
+    driver: overlay
+    attachable: true
 
 secrets:
   romm_db_password:
@@ -21,6 +24,7 @@ services:
     image: rommapp/romm:latest
     networks:
       - aether-net
+      - internal
     environment:
       - TZ=Pacific/Auckland
       - DB_HOST=romm-db
@@ -46,6 +50,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.hostname == muspelheim
@@ -75,7 +80,7 @@ services:
     image: mariadb:11.4
     stop_grace_period: 30s
     networks:
-      aether-net:
+      internal:
         aliases:
           - romm-db
     environment:
@@ -148,6 +153,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      endpoint_mode: dnsrr
       placement:
         constraints:
           - node.hostname == muspelheim
