@@ -55,3 +55,9 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/yggdrasil-lab/yggdrasil-os/main/deploy/deploy.sh -o /tmp/deploy.sh
           chmod +x /tmp/deploy.sh
           /tmp/deploy.sh "romm" docker-compose.yml
+
+      - name: Verify Post-Deploy Swarm Convergence
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/yggdrasil-lab/yggdrasil-os/main/deploy/verify_convergence.sh -o /tmp/verify_convergence.sh
+          chmod +x /tmp/verify_convergence.sh
+          /tmp/verify_convergence.sh "romm" romm_romm romm_romm-db romm_syncthing
